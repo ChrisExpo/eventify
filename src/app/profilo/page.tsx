@@ -7,7 +7,6 @@ import { useUserName } from '@/hooks/useUserName'
 import { useMyEvents } from '@/hooks/useMyEvents'
 import { EventListCard } from '@/components/event/EventListCard'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { useToast } from '@/components/ui/Toast'
 import { createClient } from '@/lib/supabase/client'
 import { validateImage } from '@/lib/image-utils'
@@ -22,62 +21,6 @@ function ProfileSkeleton() {
         <div className="flex flex-col items-center gap-4">
           <div className="w-24 h-24 rounded-full bg-surface-container animate-pulse" />
           <div className="h-6 w-32 bg-surface-container rounded animate-pulse" />
-        </div>
-      </div>
-    </main>
-  )
-}
-
-// ─── Welcome state (nessun nome salvato) ──────────────────────────────────────
-
-interface WelcomeScreenProps {
-  editName: string
-  onChangeName: (v: string) => void
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-}
-
-function WelcomeScreen({ editName, onChangeName, onSubmit }: WelcomeScreenProps) {
-  return (
-    <main className="min-h-dvh bg-background pt-[env(safe-area-inset-top)] px-4 pb-28">
-      <div className="max-w-lg mx-auto pt-6">
-        <div className="text-center py-16">
-          <div
-            className="w-24 h-24 rounded-full bg-primary/10 border border-primary/20 neon-glow-primary flex items-center justify-center mx-auto mb-6"
-            aria-hidden="true"
-          >
-            <span className="text-5xl">👋</span>
-          </div>
-
-          <h1 className="text-2xl font-headline font-bold text-on-surface mb-2">
-            Benvenuto su FriendsFest
-          </h1>
-          <p className="text-on-surface-variant mb-8">
-            Inserisci il tuo nome per personalizzare l&apos;esperienza
-          </p>
-
-          <form
-            className="max-w-xs mx-auto space-y-4"
-            onSubmit={onSubmit}
-            aria-label="Inserisci il tuo nome"
-          >
-            <Input
-              id="welcome-name"
-              label="Il tuo nome"
-              placeholder="Come ti chiami?"
-              value={editName}
-              onChange={(e) => onChangeName(e.target.value)}
-              maxLength={30}
-              autoComplete="given-name"
-            />
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full"
-              disabled={!editName.trim()}
-            >
-              Inizia
-            </Button>
-          </form>
         </div>
       </div>
     </main>
@@ -183,22 +126,7 @@ export default function ProfiloPage() {
     return <ProfileSkeleton />
   }
 
-  // Stato welcome: nessun nome salvato
-  if (!userName) {
-    return (
-      <WelcomeScreen
-        editName={editName}
-        onChangeName={setEditName}
-        onSubmit={(e) => {
-          e.preventDefault()
-          const trimmed = editName.trim()
-          if (trimmed) saveUserName(trimmed)
-        }}
-      />
-    )
-  }
-
-  // Stato normale: profilo con nome
+  // Stato normale: profilo con nome (AuthGate garantisce che userName sia sempre presente)
   const initials = userName
     .split(' ')
     .map((w) => w[0])

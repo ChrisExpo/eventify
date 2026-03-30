@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Plus_Jakarta_Sans } from "next/font/google";
 import { ToastProvider, BottomNav } from "@/components/ui";
+import AuthGate from "@/components/auth/AuthGate";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -47,8 +48,10 @@ export default function RootLayout({
     <html lang="it" className={`${spaceGrotesk.variable} ${plusJakartaSans.variable} h-full antialiased`}>
       <body className="min-h-dvh flex flex-col bg-background text-on-surface font-body">
         <ToastProvider>
-          {children}
-          <BottomNav />
+          <AuthGate>
+            {children}
+            <BottomNav />
+          </AuthGate>
         </ToastProvider>
       </body>
     </html>
