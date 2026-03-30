@@ -1,6 +1,7 @@
 export type ParticipantStatus = 'confirmed' | 'maybe' | 'declined'
 export type PollType = 'single' | 'multiple'
 export type DateMode = 'fixed' | 'flexible'
+export type EventStatus = 'draft' | 'confirmed'
 export type EventCategory =
   | 'grigliata'
   | 'cena'

@@ -4,6 +4,7 @@ import { formatEventDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import EventHeader from '@/components/event/EventHeader'
 import DateVoteGrid from '@/components/event/DateVoteGrid'
+import DateConfirmPanel from '@/components/event/DateConfirmPanel'
 import ParticipantSection from '@/components/event/ParticipantSection'
 import ItemSection from '@/components/event/ItemSection'
 import PollSection, { type PollWithOptions } from '@/components/event/PollSection'
@@ -30,7 +31,10 @@ export async function generateMetadata({
   if (!event) return { title: 'Evento non trovato' }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://friendsfest.vercel.app'
-  const description = `${formatEventDate(event.date, event.date_end)}${event.location_name ? ` · ${event.location_name}` : ''}`
+  const description =
+    event.event_status === 'draft'
+      ? `Sondaggio data in corso${event.location_name ? ` · ${event.location_name}` : ''}`
+      : `${formatEventDate(event.date, event.date_end)}${event.location_name ? ` · ${event.location_name}` : ''}`
 
   return {
     title: `${event.emoji} ${event.title} — FriendsFest`,
@@ -61,9 +65,11 @@ export default async function EventPage({
 
   if (!event) notFound()
 
+  const isDraft = event.event_status === 'draft'
   const isFlexible =
     event.date_mode === 'flexible' && !!event.flexible_week_start
 
+  // In stato draft carichiamo solo i dati strettamente necessari
   const [
     { data: participants },
     { data: items },
@@ -71,14 +77,22 @@ export default async function EventPage({
     { data: expenses },
     { data: dateVotes },
   ] = await Promise.all([
-    supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
-    supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
-    supabase
-      .from('polls')
-      .select('*, poll_options(*)')
-      .eq('event_id', event.id)
-      .order('created_at'),
-    supabase.from('expenses').select('*').eq('event_id', event.id).order('created_at'),
+    isDraft
+      ? Promise.resolve({ data: [] })
+      : supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
+    isDraft
+      ? Promise.resolve({ data: [] })
+      : supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
+    isDraft
+      ? Promise.resolve({ data: [] })
+      : supabase
+          .from('polls')
+          .select('*, poll_options(*)')
+          .eq('event_id', event.id)
+          .order('created_at'),
+    isDraft
+      ? Promise.resolve({ data: [] })
+      : supabase.from('expenses').select('*').eq('event_id', event.id).order('created_at'),
     isFlexible
       ? supabase.from('date_votes').select('*').eq('event_id', event.id).order('created_at')
       : Promise.resolve({ data: [] }),
@@ -94,6 +108,7 @@ export default async function EventPage({
       />
 
       <div className="mx-auto max-w-lg px-4 pt-[calc(3.5rem+env(safe-area-inset-top))] pb-24 space-y-6">
+        {/* Header evento */}
         <div
           className="animate-slide-in-up"
           style={{ animationDelay: '0ms', opacity: 0, animationFillMode: 'forwards' }}
@@ -101,7 +116,7 @@ export default async function EventPage({
           <EventHeader event={event} />
         </div>
 
-        {/* Griglia votazione date — solo per eventi flessibili */}
+        {/* Griglia votazione date — visibile se flessibile (draft o confirmed) */}
         {isFlexible && event.flexible_week_start && (
           <div
             className="animate-slide-in-up"
@@ -115,49 +130,69 @@ export default async function EventPage({
           </div>
         )}
 
-        <div
-          className="animate-slide-in-up"
-          style={{ animationDelay: '100ms', opacity: 0, animationFillMode: 'forwards' }}
-        >
-          <ParticipantSection
-            eventId={event.id}
-            eventSlug={slug}
-            initialParticipants={participants ?? []}
-          />
-        </div>
+        {/* Pannello conferma data — SOLO in stato draft e se evento flessibile */}
+        {isDraft && isFlexible && event.flexible_week_start && (
+          <div
+            className="animate-slide-in-up"
+            style={{ animationDelay: '120ms', opacity: 0, animationFillMode: 'forwards' }}
+          >
+            <DateConfirmPanel
+              eventSlug={slug}
+              eventId={event.id}
+              weekStart={event.flexible_week_start}
+              dateVotes={dateVotes ?? []}
+            />
+          </div>
+        )}
 
-        <div
-          className="animate-slide-in-up"
-          style={{ animationDelay: '200ms', opacity: 0, animationFillMode: 'forwards' }}
-        >
-          <ItemSection
-            eventId={event.id}
-            initialItems={items ?? []}
-            participants={participants ?? []}
-          />
-        </div>
+        {/* Sezioni complete — SOLO se evento confermato */}
+        {!isDraft && (
+          <>
+            <div
+              className="animate-slide-in-up"
+              style={{ animationDelay: '100ms', opacity: 0, animationFillMode: 'forwards' }}
+            >
+              <ParticipantSection
+                eventId={event.id}
+                eventSlug={slug}
+                initialParticipants={participants ?? []}
+              />
+            </div>
 
-        <div
-          className="animate-slide-in-up"
-          style={{ animationDelay: '300ms', opacity: 0, animationFillMode: 'forwards' }}
-        >
-          <PollSection
-            eventId={event.id}
-            initialPolls={(polls ?? []) as PollWithOptions[]}
-          />
-        </div>
+            <div
+              className="animate-slide-in-up"
+              style={{ animationDelay: '200ms', opacity: 0, animationFillMode: 'forwards' }}
+            >
+              <ItemSection
+                eventId={event.id}
+                initialItems={items ?? []}
+                participants={participants ?? []}
+              />
+            </div>
 
-        <div
-          className="animate-slide-in-up"
-          style={{ animationDelay: '400ms', opacity: 0, animationFillMode: 'forwards' }}
-        >
-          <ExpenseSection
-            eventId={event.id}
-            eventTitle={event.title}
-            initialExpenses={expenses ?? []}
-            participants={participants ?? []}
-          />
-        </div>
+            <div
+              className="animate-slide-in-up"
+              style={{ animationDelay: '300ms', opacity: 0, animationFillMode: 'forwards' }}
+            >
+              <PollSection
+                eventId={event.id}
+                initialPolls={(polls ?? []) as PollWithOptions[]}
+              />
+            </div>
+
+            <div
+              className="animate-slide-in-up"
+              style={{ animationDelay: '400ms', opacity: 0, animationFillMode: 'forwards' }}
+            >
+              <ExpenseSection
+                eventId={event.id}
+                eventTitle={event.title}
+                initialExpenses={expenses ?? []}
+                participants={participants ?? []}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       <ShareBar

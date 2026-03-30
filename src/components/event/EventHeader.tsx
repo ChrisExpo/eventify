@@ -47,6 +47,12 @@ export default function EventHeader({ event }: EventHeaderProps) {
           <h1 className="font-headline text-2xl font-bold text-on-surface leading-tight">
             {event.title}
           </h1>
+          {event.event_status === 'draft' && (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-secondary/10 text-secondary text-xs font-bold uppercase tracking-widest rounded-full border border-secondary/20 mt-2">
+              <span className="w-2 h-2 bg-secondary rounded-full animate-pulse" aria-hidden="true" />
+              Sondaggio in corso
+            </span>
+          )}
         </div>
 
         {/* Data */}

@@ -69,6 +69,7 @@ export async function createEvent(formData: FormData) {
     creator_name: creatorName,
     creator_token: creatorToken,
     image_url: imageUrl,
+    event_status: dateMode === 'flexible' ? 'draft' : 'confirmed',
   })
 
   if (error) {
@@ -175,4 +176,33 @@ export async function deleteEvent(slug: string, creatorToken: string) {
   if (error) return { error: "Errore nell'eliminazione" }
 
   return { success: true, redirect: '/' }
+}
+
+export async function confirmEventDate(
+  slug: string,
+  creatorToken: string,
+  selectedDate: string // formato "2026-04-09"
+) {
+  const supabase = await createServerSupabaseClient()
+
+  // Mezzogiorno UTC per evitare shift da timezone
+  const dateTimestamp = new Date(selectedDate + 'T12:00:00').toISOString()
+
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      event_status: 'confirmed',
+      date: dateTimestamp,
+      // date_mode resta 'flexible' per storico
+    })
+    .eq('slug', slug)
+    .eq('creator_token', creatorToken)
+    .select()
+    .single()
+
+  if (!data) return { error: 'Non autorizzato o evento non trovato' }
+  if (error) return { error: 'Errore nella conferma della data' }
+
+  revalidatePath(`/evento/${slug}`)
+  return { success: true }
 }

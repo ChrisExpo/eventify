@@ -55,6 +55,7 @@ export type Database = {
           image_url: string | null
           creator_name: string
           creator_token: string
+          event_status: string
           created_at: string
           updated_at: string
         }
@@ -74,6 +75,7 @@ export type Database = {
           image_url?: string | null
           creator_name: string
           creator_token: string
+          event_status?: string
           created_at?: string
           updated_at?: string
         }
@@ -93,6 +95,7 @@ export type Database = {
           image_url?: string | null
           creator_name?: string
           creator_token?: string
+          event_status?: string
           created_at?: string
           updated_at?: string
         }

@@ -76,11 +76,18 @@ export function EventListCard({ event }: EventListCardProps) {
               )}
             </div>
 
-            {/* Data */}
-            <p className="text-sm text-on-surface-variant flex items-center gap-1.5">
-              <Calendar size={14} className="text-primary flex-shrink-0" aria-hidden="true" />
-              {formatCardDate(event.date, event.date_end)}
-            </p>
+            {/* Data o badge sondaggio */}
+            {event.event_status === 'draft' ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest px-2 py-0.5 bg-secondary/10 text-secondary rounded-full border border-secondary/20">
+                <span className="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse" aria-hidden="true" />
+                Sondaggio
+              </span>
+            ) : (
+              <p className="text-sm text-on-surface-variant flex items-center gap-1.5">
+                <Calendar size={14} className="text-primary flex-shrink-0" aria-hidden="true" />
+                {formatCardDate(event.date, event.date_end)}
+              </p>
+            )}
 
             {/* Luogo */}
             {event.location_name && (
