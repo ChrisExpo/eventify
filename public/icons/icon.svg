@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Sfondo cerchio terracotta -->
+  <rect width="512" height="512" rx="112" fill="#C75B39"/>
+  <!-- Cerchio interno più chiaro per profondità -->
+  <circle cx="256" cy="256" r="180" fill="#D4694A" opacity="0.4"/>
+  <!-- Emoji festa centralizzata -->
+  <text
+    x="256"
+    y="320"
+    font-size="240"
+    text-anchor="middle"
+    dominant-baseline="auto"
+    font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif"
+  >🎉</text>
+</svg>

@@ -1,65 +1,166 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import Link from 'next/link'
+
+import { Button } from '@/components/ui/Button'
+import { EventListCard } from '@/components/event/EventListCard'
+import { useMyEvents } from '@/hooks/useMyEvents'
+import type { MyEvent } from '@/hooks/useMyEvents'
+
+// ─── Skeleton loading ─────────────────────────────────────────────────────────
+
+function SkeletonCard() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-surface-container-high rounded-[1rem] p-4 animate-pulse">
+      <div className="flex items-start gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-surface-container flex-shrink-0" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 bg-surface-container rounded w-3/4" />
+          <div className="h-3 bg-surface-container rounded w-1/2" />
+          <div className="h-3 bg-surface-container rounded w-1/3" />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+    </div>
+  )
+}
+
+function SkeletonList() {
+  return (
+    <div className="space-y-3" aria-busy="true" aria-label="Caricamento eventi in corso">
+      <SkeletonCard />
+      <SkeletonCard />
+      <SkeletonCard />
+    </div>
+  )
+}
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-16 px-4 animate-fade-in">
+      {/* Emoji con pulse-ring */}
+      <div className="relative mb-6">
+        <div className="pulse-ring" aria-hidden="true" />
+        <div className="relative w-24 h-24 rounded-3xl bg-primary/10 border-2 border-primary/20 flex items-center justify-center neon-glow-primary">
+          <span className="text-5xl leading-none" role="img" aria-label="teatro">
+            🎭
+          </span>
         </div>
+      </div>
+
+      <h2 className="font-headline text-2xl font-bold text-on-surface mb-2">
+        Nessun evento ancora
+      </h2>
+      <p className="text-on-surface-variant text-sm leading-relaxed max-w-xs mb-8">
+        Crea il tuo primo evento o partecipa tramite un link condiviso da un amico.
+      </p>
+
+      <Link href="/crea">
+        <Button variant="primary" size="lg">
+          Crea il tuo primo evento
+        </Button>
+      </Link>
+    </div>
+  )
+}
+
+// ─── Sezione eventi ───────────────────────────────────────────────────────────
+
+interface EventSectionProps {
+  title: string
+  events: MyEvent[]
+  muted?: boolean
+}
+
+function EventSection({ title, events, muted = false }: EventSectionProps) {
+  if (events.length === 0) return null
+
+  return (
+    <section aria-labelledby={`section-${title.toLowerCase()}`}>
+      <h2
+        id={`section-${title.toLowerCase()}`}
+        className={[
+          'text-xs font-bold uppercase tracking-widest mb-3',
+          muted ? 'text-on-surface-variant' : 'text-primary',
+        ].join(' ')}
+      >
+        {title}
+      </h2>
+      <ul className="space-y-3">
+        {events.map((event, index) => (
+          <li
+            key={event.id}
+            className="animate-fade-in"
+            style={{ animationDelay: `${index * 60}ms`, opacity: 0, animationFillMode: 'forwards' }}
+          >
+            <EventListCard event={event} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+// ─── Homepage ─────────────────────────────────────────────────────────────────
+
+export default function HomePage() {
+  const { events, loading, isEmpty } = useMyEvents()
+
+  const now = new Date()
+  const futureEvents = events.filter((e) => new Date(e.date) >= now)
+  const pastEvents = events.filter((e) => new Date(e.date) < now)
+
+  return (
+    <div className="flex flex-col min-h-full bg-background">
+      <main className="flex-1 w-full max-w-lg mx-auto px-4 pt-[env(safe-area-inset-top)] pb-28 sm:px-6">
+        {/* Logo Eventify inline */}
+        <div className="flex items-center gap-2 mb-6 pt-6">
+          <span className="text-2xl">⚡</span>
+          <span className="text-xl font-bold font-headline bg-gradient-to-r from-primary to-primary-dim bg-clip-text text-transparent">
+            Eventify
+          </span>
+        </div>
+
+        {/* Hero compatta */}
+        <header className="mb-6">
+          <div
+            className="animate-slide-in-up"
+            style={{ animationDelay: '0ms', opacity: 0, animationFillMode: 'forwards' }}
+          >
+            <h1 className="font-headline text-2xl font-bold text-on-surface mb-1">
+              I tuoi eventi
+            </h1>
+            <p className="text-sm text-on-surface-variant">
+              Gestisci e partecipa ai tuoi eventi
+            </p>
+          </div>
+        </header>
+
+        {/* Contenuto dinamico */}
+        {loading && <SkeletonList />}
+
+        {isEmpty && <EmptyState />}
+
+        {!loading && !isEmpty && (
+          <div className="space-y-6">
+            {/* Prossimi */}
+            <EventSection title="Prossimi" events={futureEvents} />
+
+            {/* Divider solo se ci sono entrambe le sezioni */}
+            {futureEvents.length > 0 && pastEvents.length > 0 && (
+              <div
+                className="gradient-divider"
+                role="separator"
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Passati */}
+            <EventSection title="Passati" events={pastEvents} muted />
+          </div>
+        )}
       </main>
     </div>
-  );
+  )
 }

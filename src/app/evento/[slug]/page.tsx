@@ -1,0 +1,108 @@
+import type { Metadata } from 'next'
+import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { formatDateItalian } from '@/lib/utils'
+import { notFound } from 'next/navigation'
+import EventHeader from '@/components/event/EventHeader'
+import ParticipantSection from '@/components/event/ParticipantSection'
+import ItemSection from '@/components/event/ItemSection'
+import ShareBar from '@/components/share/ShareBar'
+import AppBar from '@/components/ui/AppBar'
+import EventFAB from '@/components/event/EventFAB'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params
+  const supabase = await createServerSupabaseClient()
+  const { data: event } = await supabase
+    .from('events')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (!event) return { title: 'Evento non trovato' }
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://eventify.vercel.app'
+  const description = `${formatDateItalian(event.date)}${event.location_name ? ` · ${event.location_name}` : ''}`
+
+  return {
+    title: `${event.emoji} ${event.title} — Eventify`,
+    description,
+    openGraph: {
+      title: `${event.emoji} ${event.title}`,
+      description,
+      images: [`${baseUrl}/api/og/${slug}`],
+      url: `${baseUrl}/evento/${slug}`,
+      type: 'website',
+    },
+  }
+}
+
+export default async function EventPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params
+  const supabase = await createServerSupabaseClient()
+
+  const { data: event } = await supabase
+    .from('events')
+    .select('*')
+    .eq('slug', slug)
+    .single()
+
+  if (!event) notFound()
+
+  const [{ data: participants }, { data: items }] = await Promise.all([
+    supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
+    supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
+  ])
+
+  return (
+    <main className="min-h-screen bg-background">
+      <AppBar title={`${event.emoji} ${event.title}`} showBack />
+
+      <div className="mx-auto max-w-lg px-4 pt-[calc(3.5rem+env(safe-area-inset-top))] pb-24 space-y-6">
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: '0ms', opacity: 0, animationFillMode: 'forwards' }}
+        >
+          <EventHeader event={event} />
+        </div>
+
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: '100ms', opacity: 0, animationFillMode: 'forwards' }}
+        >
+          <ParticipantSection
+            eventId={event.id}
+            eventSlug={slug}
+            initialParticipants={participants ?? []}
+          />
+        </div>
+
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: '200ms', opacity: 0, animationFillMode: 'forwards' }}
+        >
+          <ItemSection
+            eventId={event.id}
+            initialItems={items ?? []}
+            participants={participants ?? []}
+          />
+        </div>
+      </div>
+
+      <ShareBar
+        event={event}
+        participants={participants ?? []}
+        items={items ?? []}
+      />
+
+      <EventFAB slug={slug} />
+    </main>
+  )
+}
