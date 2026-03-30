@@ -5,6 +5,8 @@ import { notFound } from 'next/navigation'
 import EventHeader from '@/components/event/EventHeader'
 import ParticipantSection from '@/components/event/ParticipantSection'
 import ItemSection from '@/components/event/ItemSection'
+import PollSection, { type PollWithOptions } from '@/components/event/PollSection'
+import ExpenseSection from '@/components/event/ExpenseSection'
 import ShareBar from '@/components/share/ShareBar'
 import AppBar from '@/components/ui/AppBar'
 import EventFAB from '@/components/event/EventFAB'
@@ -24,11 +26,11 @@ export async function generateMetadata({
 
   if (!event) return { title: 'Evento non trovato' }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://eventify.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://friendsfest.vercel.app'
   const description = `${formatDateItalian(event.date)}${event.location_name ? ` · ${event.location_name}` : ''}`
 
   return {
-    title: `${event.emoji} ${event.title} — Eventify`,
+    title: `${event.emoji} ${event.title} — FriendsFest`,
     description,
     openGraph: {
       title: `${event.emoji} ${event.title}`,
@@ -56,10 +58,17 @@ export default async function EventPage({
 
   if (!event) notFound()
 
-  const [{ data: participants }, { data: items }] = await Promise.all([
-    supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
-    supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
-  ])
+  const [{ data: participants }, { data: items }, { data: polls }, { data: expenses }] =
+    await Promise.all([
+      supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
+      supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
+      supabase
+        .from('polls')
+        .select('*, poll_options(*)')
+        .eq('event_id', event.id)
+        .order('created_at'),
+      supabase.from('expenses').select('*').eq('event_id', event.id).order('created_at'),
+    ])
 
   return (
     <main className="min-h-screen bg-background">
@@ -91,6 +100,28 @@ export default async function EventPage({
           <ItemSection
             eventId={event.id}
             initialItems={items ?? []}
+            participants={participants ?? []}
+          />
+        </div>
+
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: '300ms', opacity: 0, animationFillMode: 'forwards' }}
+        >
+          <PollSection
+            eventId={event.id}
+            initialPolls={(polls ?? []) as PollWithOptions[]}
+          />
+        </div>
+
+        <div
+          className="animate-slide-in-up"
+          style={{ animationDelay: '400ms', opacity: 0, animationFillMode: 'forwards' }}
+        >
+          <ExpenseSection
+            eventId={event.id}
+            eventTitle={event.title}
+            initialExpenses={expenses ?? []}
             participants={participants ?? []}
           />
         </div>

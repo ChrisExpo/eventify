@@ -60,3 +60,22 @@ export function formatEventMessage(
 export function getWhatsAppUrl(message: string): string {
   return `https://wa.me/?text=${encodeURIComponent(message)}`
 }
+
+export function formatBalanceMessage(
+  eventTitle: string,
+  debts: { from: string; to: string; amount: number }[],
+  totalAmount: number
+): string {
+  let msg = `💰 *Saldi — ${eventTitle}*\n\n`
+
+  if (debts.length === 0) {
+    msg += `✅ Tutti pari!\n`
+  } else {
+    debts.forEach(d => {
+      msg += `• ${d.from} deve €${d.amount.toFixed(2)} a ${d.to}\n`
+    })
+  }
+
+  msg += `\nTotale spese evento: €${totalAmount.toFixed(2)}`
+  return msg
+}
