@@ -84,7 +84,7 @@ export async function GET(
                 </p>
               )}
               <p style={{ fontSize: 16, color: '#d394ff', margin: 0, marginTop: 16, opacity: 0.7 }}>
-                Eventify
+                FriendsFest
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export async function GET(
                 opacity: 0.8,
               }}
             >
-              Eventify
+              FriendsFest
             </p>
           </div>
         )}

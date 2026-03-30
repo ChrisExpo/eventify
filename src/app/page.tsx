@@ -114,12 +114,9 @@ export default function HomePage() {
   return (
     <div className="flex flex-col min-h-full bg-background">
       <main className="flex-1 w-full max-w-lg mx-auto px-4 pt-[env(safe-area-inset-top)] pb-28 sm:px-6">
-        {/* Logo Eventify inline */}
-        <div className="flex items-center gap-2 mb-6 pt-6">
-          <span className="text-2xl">⚡</span>
-          <span className="text-xl font-bold font-headline bg-gradient-to-r from-primary to-primary-dim bg-clip-text text-transparent">
-            Eventify
-          </span>
+        {/* Logo FriendsFest */}
+        <div className="flex items-center justify-center mb-6 pt-6">
+          <img src="/logo.png" alt="FriendsFest" className="h-10 object-contain" />
         </div>
 
         {/* Hero compatta */}

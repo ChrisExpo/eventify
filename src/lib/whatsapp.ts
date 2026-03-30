@@ -51,7 +51,7 @@ export function formatEventMessage(
     })
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://eventify.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://friendsfest.vercel.app'
   msg += `\n🔗 Rispondi qui: ${baseUrl}/evento/${event.slug}`
 
   return msg

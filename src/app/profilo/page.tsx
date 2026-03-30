@@ -49,7 +49,7 @@ function WelcomeScreen({ editName, onChangeName, onSubmit }: WelcomeScreenProps)
           </div>
 
           <h1 className="text-2xl font-headline font-bold text-on-surface mb-2">
-            Benvenuto su Eventify
+            Benvenuto su FriendsFest
           </h1>
           <p className="text-on-surface-variant mb-8">
             Inserisci il tuo nome per personalizzare l&apos;esperienza

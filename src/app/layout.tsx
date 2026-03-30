@@ -25,13 +25,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Eventify — Organizza eventi",
-  description: "Crea e gestisci eventi in modo semplice. Condividi con amici e raccogli le adesioni senza stress.",
-  // manifest.webmanifest è servito automaticamente da Next.js tramite src/app/manifest.ts
+  title: "FriendsFest — Organize · Connect · Celebrate",
+  description: "Organizza eventi di gruppo con i tuoi amici. Condividi su WhatsApp e gestisci tutto facilmente.",
+  icons: {
+    icon: '/favicon.png',
+    apple: '/apple-touch-icon.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Eventify',
+    title: 'FriendsFest',
   },
 };
 

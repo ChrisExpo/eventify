@@ -2,9 +2,9 @@ import type { MetadataRoute } from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Eventify — Organizza eventi',
-    short_name: 'Eventify',
-    description: 'Organizza eventi di gruppo e condividi su WhatsApp',
+    name: 'FriendsFest — Organize · Connect · Celebrate',
+    short_name: 'FriendsFest',
+    description: 'Organizza eventi di gruppo con i tuoi amici e condividi su WhatsApp',
     start_url: '/',
     display: 'standalone',
     display_override: ['standalone'],

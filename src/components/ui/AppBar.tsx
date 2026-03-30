@@ -41,9 +41,7 @@ export default function AppBar({ title, showBack = false, rightAction, className
           {title ? (
             <h1 className="text-sm font-bold font-headline text-on-surface truncate">{title}</h1>
           ) : (
-            <span className="text-lg font-bold font-headline bg-gradient-to-r from-primary to-primary-dim bg-clip-text text-transparent">
-              Eventify
-            </span>
+            <img src="/logo.png" alt="FriendsFest" className="h-7 object-contain" />
           )}
         </div>
         {/* Right */}
