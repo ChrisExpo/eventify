@@ -17,11 +17,11 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 z-40 bg-background/80 backdrop-blur-xl border-t border-primary/10 shadow-[0_0_20px_rgba(211,148,255,0.1)]"
+      className="fixed bottom-0 inset-x-0 z-40 bg-background/80 backdrop-blur-xl border-t border-primary/10 shadow-[0_0_20px_rgba(211,148,255,0.1)] pb-[env(safe-area-inset-bottom)]"
       role="navigation"
       aria-label="Navigazione principale"
     >
-      <div className="flex items-end justify-around h-16 px-6 pb-[env(safe-area-inset-bottom)] max-w-lg mx-auto">
+      <div className="flex items-end justify-around h-16 px-6 pb-2 max-w-lg mx-auto">
         {/* Home */}
         <Link
           href="/"
