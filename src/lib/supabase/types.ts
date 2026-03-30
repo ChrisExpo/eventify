@@ -12,6 +12,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string
+          device_id: string
+          name: string
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          device_id: string
+          name: string
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          device_id?: string
+          name?: string
+          avatar_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           id: string

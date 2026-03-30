@@ -15,6 +15,7 @@ export type { Database } from '@/lib/supabase/types'
 // Convenience Row aliases — use these in components instead of the verbose Database path
 import type { Database as DB } from '@/lib/supabase/types'
 
+export type User = DB['public']['Tables']['users']['Row']
 export type Event = DB['public']['Tables']['events']['Row']
 export type Participant = DB['public']['Tables']['participants']['Row']
 export type Item = DB['public']['Tables']['items']['Row']

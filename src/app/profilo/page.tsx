@@ -46,7 +46,7 @@ function EventSkeletonCard() {
 // ─── Pagina profilo principale ────────────────────────────────────────────────
 
 export default function ProfiloPage() {
-  const { userName, avatarUrl, loaded, saveUserName, saveAvatarUrl, clearAvatarUrl } = useUserName()
+  const { userName, avatarUrl, userId, loaded, saveUserName, saveAvatarUrl, clearAvatarUrl } = useUserName()
   const { events, loading } = useMyEvents()
   const { toast } = useToast()
 
@@ -67,15 +67,10 @@ export default function ProfiloPage() {
     try {
       const supabase = createClient()
 
-      // Genera un ID unico per l'utente basato su ciò che ha in localStorage
-      let userId = localStorage.getItem('eventify_user_id')
-      if (!userId) {
-        userId = crypto.randomUUID()
-        localStorage.setItem('eventify_user_id', userId)
-      }
-
+      // Usa lo userId dal DB (esposto da useUserName) come path per lo storage
+      const storageId = userId ?? crypto.randomUUID()
       const ext = file.name.split('.').pop() || 'jpg'
-      const filePath = `${userId}/avatar.${ext}`
+      const filePath = `${storageId}/avatar.${ext}`
 
       const { error: uploadError } = await supabase.storage
         .from('user-avatars')
@@ -106,16 +101,15 @@ export default function ProfiloPage() {
 
   async function handleRemoveAvatar() {
     try {
-      const supabase = createClient()
-      const userId = localStorage.getItem('eventify_user_id')
       if (userId) {
+        const supabase = createClient()
         const { data: files } = await supabase.storage.from('user-avatars').list(userId)
         if (files && files.length > 0) {
           await supabase.storage.from('user-avatars').remove(files.map(f => `${userId}/${f.name}`))
         }
       }
     } catch {
-      // Ignora errori di eliminazione
+      // Ignora errori di eliminazione storage
     }
     clearAvatarUrl()
     toast('Foto profilo rimossa', 'info')
