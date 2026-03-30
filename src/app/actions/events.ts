@@ -12,13 +12,16 @@ export async function createEvent(formData: FormData) {
   const title = formData.get('title') as string
   const emoji = (formData.get('emoji') as string) || '🎉'
   const category = formData.get('category') as string
-  const date = formData.get('date') as string
+  const dateRaw = formData.get('date') as string | null
+  const dateEndRaw = formData.get('date_end') as string | null
+  const date = dateRaw && dateRaw.trim() !== '' ? dateRaw.trim() : null
+  const dateEnd = dateEndRaw && dateEndRaw.trim() !== '' ? dateEndRaw.trim() : null
   const locationName = formData.get('location_name') as string | null
   const locationUrl = formData.get('location_url') as string | null
   const description = formData.get('description') as string | null
   const creatorName = formData.get('creator_name') as string
 
-  if (!title || !date || !creatorName) {
+  if (!title || !creatorName) {
     return { error: 'Compila tutti i campi obbligatori' }
   }
 
@@ -51,6 +54,7 @@ export async function createEvent(formData: FormData) {
     emoji,
     category: category || 'altro',
     date,
+    date_end: dateEnd,
     location_name: locationName || null,
     location_url: locationUrl || null,
     description: description || null,
@@ -110,11 +114,15 @@ export async function updateEvent(
     }
   }
 
+  const updateDateRaw = formData.get('date') as string | null
+  const updateDateEndRaw = formData.get('date_end') as string | null
+
   const updateData: Record<string, unknown> = {
     title: formData.get('title') as string,
     emoji: (formData.get('emoji') as string) || '🎉',
     category: (formData.get('category') as string) || 'altro',
-    date: formData.get('date') as string,
+    date: updateDateRaw && updateDateRaw.trim() !== '' ? updateDateRaw.trim() : null,
+    date_end: updateDateEndRaw && updateDateEndRaw.trim() !== '' ? updateDateEndRaw.trim() : null,
     location_name: (formData.get('location_name') as string) || null,
     location_url: (formData.get('location_url') as string) || null,
     description: (formData.get('description') as string) || null,

@@ -3,7 +3,8 @@ import { formatDateItalian } from './utils'
 interface EventData {
   emoji: string
   title: string
-  date: string
+  date: string | null
+  date_end?: string | null
   location_name: string | null
   location_url: string | null
   slug: string
@@ -28,7 +29,15 @@ export function formatEventMessage(
   const maybe = participants.filter(p => p.status === 'maybe')
 
   let msg = `${event.emoji} *${event.title}*\n\n`
-  msg += `📅 ${formatDateItalian(event.date)}\n`
+  if (event.date) {
+    msg += `📅 ${formatDateItalian(event.date)}`
+    if (event.date_end) {
+      msg += ` → ${formatDateItalian(event.date_end)}`
+    }
+    msg += `\n`
+  } else {
+    msg += `📅 Data da definire\n`
+  }
 
   if (event.location_name) {
     msg += `📍 ${event.location_name}\n`

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { formatDateItalian } from '@/lib/utils'
+import { formatEventDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import EventHeader from '@/components/event/EventHeader'
 import ParticipantSection from '@/components/event/ParticipantSection'
@@ -29,7 +29,7 @@ export async function generateMetadata({
   if (!event) return { title: 'Evento non trovato' }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://friendsfest.vercel.app'
-  const description = `${formatDateItalian(event.date)}${event.location_name ? ` · ${event.location_name}` : ''}`
+  const description = `${formatEventDate(event.date, event.date_end)}${event.location_name ? ` · ${event.location_name}` : ''}`
 
   return {
     title: `${event.emoji} ${event.title} — FriendsFest`,

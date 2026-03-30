@@ -5,12 +5,20 @@ import { Calendar, MapPin, Users, ChevronRight } from 'lucide-react'
 import { formatDateShort } from '@/lib/utils'
 import type { MyEvent } from '@/hooks/useMyEvents'
 
+function formatCardDate(date: string | null, dateEnd?: string | null): string {
+  if (!date) return 'Data da definire'
+  if (dateEnd) {
+    return `Dal ${formatDateShort(date)} al ${formatDateShort(dateEnd)}`
+  }
+  return formatDateShort(date)
+}
+
 interface EventListCardProps {
   event: MyEvent
 }
 
 export function EventListCard({ event }: EventListCardProps) {
-  const isPast = new Date(event.date) < new Date()
+  const isPast = event.date ? new Date(event.date) < new Date() : false
 
   return (
     <Link
@@ -71,7 +79,7 @@ export function EventListCard({ event }: EventListCardProps) {
             {/* Data */}
             <p className="text-sm text-on-surface-variant flex items-center gap-1.5">
               <Calendar size={14} className="text-primary flex-shrink-0" aria-hidden="true" />
-              {formatDateShort(event.date)}
+              {formatCardDate(event.date, event.date_end)}
             </p>
 
             {/* Luogo */}

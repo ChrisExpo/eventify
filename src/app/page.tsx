@@ -108,8 +108,8 @@ export default function HomePage() {
   const { events, loading, isEmpty } = useMyEvents()
 
   const now = new Date()
-  const futureEvents = events.filter((e) => new Date(e.date) >= now)
-  const pastEvents = events.filter((e) => new Date(e.date) < now)
+  const futureEvents = events.filter((e) => !e.date || new Date(e.date) >= now)
+  const pastEvents = events.filter((e) => e.date && new Date(e.date) < now)
 
   return (
     <div className="flex flex-col min-h-full bg-background">

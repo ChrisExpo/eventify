@@ -46,7 +46,8 @@ export type Database = {
           description: string | null
           emoji: string
           category: string
-          date: string
+          date: string | null
+          date_end: string | null
           location_name: string | null
           location_url: string | null
           image_url: string | null
@@ -62,7 +63,8 @@ export type Database = {
           description?: string | null
           emoji?: string
           category?: string
-          date: string
+          date?: string | null
+          date_end?: string | null
           location_name?: string | null
           location_url?: string | null
           image_url?: string | null
@@ -78,7 +80,8 @@ export type Database = {
           description?: string | null
           emoji?: string
           category?: string
-          date?: string
+          date?: string | null
+          date_end?: string | null
           location_name?: string | null
           location_url?: string | null
           image_url?: string | null

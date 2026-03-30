@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { formatDateItalian } from '@/lib/utils'
+import { formatEventDate } from '@/lib/utils'
 
 export const runtime = 'nodejs'
 
@@ -71,7 +71,7 @@ export async function GET(
                 {event.title}
               </h1>
               <p style={{ fontSize: 24, color: '#b5a4cd', margin: 0, marginBottom: 6 }}>
-                📅 {formatDateItalian(event.date)}
+                📅 {formatEventDate(event.date, event.date_end)}
               </p>
               {event.location_name && (
                 <p style={{ fontSize: 22, color: '#b5a4cd', margin: 0, marginBottom: 6 }}>
@@ -116,7 +116,7 @@ export async function GET(
               {event.title}
             </h1>
             <p style={{ fontSize: 24, color: '#b5a4cd', marginBottom: 8 }}>
-              📅 {formatDateItalian(event.date)}
+              📅 {formatEventDate(event.date, event.date_end)}
             </p>
             {event.location_name && (
               <p style={{ fontSize: 22, color: '#b5a4cd' }}>

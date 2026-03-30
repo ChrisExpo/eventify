@@ -44,6 +44,7 @@ interface FormState {
   title: string
   category: string
   date: string
+  dateEnd: string
   locationName: string
   locationUrl: string
   description: string
@@ -51,7 +52,6 @@ interface FormState {
 
 interface FormErrors {
   title?: string
-  date?: string
 }
 
 interface EditEventFormProps {
@@ -152,6 +152,7 @@ export function EditEventForm({ event, creatorToken }: EditEventFormProps) {
     title: event.title ?? '',
     category: event.category ?? 'altro',
     date: event.date ? toDatetimeLocal(event.date) : '',
+    dateEnd: event.date_end ? toDatetimeLocal(event.date_end) : '',
     locationName: event.location_name ?? '',
     locationUrl: event.location_url ?? '',
     description: event.description ?? '',
@@ -174,7 +175,6 @@ export function EditEventForm({ event, creatorToken }: EditEventFormProps) {
   function validate(): boolean {
     const next: FormErrors = {}
     if (!form.title.trim()) next.title = 'Il titolo è obbligatorio'
-    if (!form.date) next.date = 'Inserisci data e ora'
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -187,7 +187,13 @@ export function EditEventForm({ event, creatorToken }: EditEventFormProps) {
     fd.set('emoji', form.emoji)
     fd.set('title', form.title.trim())
     fd.set('category', form.category)
-    fd.set('date', form.date)
+    // Converti la data locale in ISO con timezone per evitare offset UTC
+    if (form.date) {
+      fd.set('date', new Date(form.date).toISOString())
+    }
+    if (form.dateEnd) {
+      fd.set('date_end', new Date(form.dateEnd).toISOString())
+    }
     fd.set('location_name', form.locationName.trim())
     fd.set('location_url', form.locationUrl.trim())
     fd.set('description', form.description.trim())
@@ -282,14 +288,26 @@ export function EditEventForm({ event, creatorToken }: EditEventFormProps) {
 
             <Input
               id="edit-event-date"
-              label="Data e ora *"
+              label="Data e ora"
               name="date"
               type="datetime-local"
               value={form.date}
               onChange={(e) => set('date', e.target.value)}
-              error={errors.date}
               className="cursor-pointer"
             />
+
+            {form.date && (
+              <Input
+                id="edit-event-date-end"
+                label="Data fine (opzionale)"
+                name="date_end"
+                type="datetime-local"
+                value={form.dateEnd}
+                onChange={(e) => set('dateEnd', e.target.value)}
+                min={form.date}
+                className="cursor-pointer"
+              />
+            )}
           </CardContent>
           <div className="h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent mx-4" aria-hidden="true" />
 

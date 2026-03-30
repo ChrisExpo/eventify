@@ -1,6 +1,6 @@
 import { Calendar, MapPin } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui'
-import { formatDateItalian } from '@/lib/utils'
+import { formatEventDate } from '@/lib/utils'
 import type { Event } from '@/types'
 
 interface EventHeaderProps {
@@ -50,8 +50,8 @@ export default function EventHeader({ event }: EventHeaderProps) {
         {/* Data */}
         <div className="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
           <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <time dateTime={event.date} className="capitalize">
-            {formatDateItalian(event.date)}
+          <time dateTime={event.date ?? undefined} className="capitalize">
+            {formatEventDate(event.date, event.date_end)}
           </time>
         </div>
 

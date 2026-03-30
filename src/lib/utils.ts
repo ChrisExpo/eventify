@@ -23,3 +23,13 @@ export function formatDateShort(date: string | Date): string {
   const d = typeof date === 'string' ? new Date(date) : date
   return format(d, "d MMM yyyy, HH:mm", { locale: it })
 }
+
+export function formatEventDate(date: string | null, dateEnd?: string | null): string {
+  if (!date) return 'Data da definire'
+  const start = formatDateItalian(date)
+  if (dateEnd) {
+    const end = formatDateItalian(dateEnd)
+    return `Dal ${start} al ${end}`
+  }
+  return start
+}
