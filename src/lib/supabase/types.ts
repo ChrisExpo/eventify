@@ -195,6 +195,54 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          id: string
+          event_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          endpoint: string
+          p256dh: string
+          auth: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          endpoint?: string
+          p256dh?: string
+          auth?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      notification_log: {
+        Row: {
+          id: string
+          event_id: string
+          type: '24h' | '2h'
+          sent_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          type: '24h' | '2h'
+          sent_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          type?: '24h' | '2h'
+          sent_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

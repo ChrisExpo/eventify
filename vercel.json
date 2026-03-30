@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/push/send?secret=${PUSH_CRON_SECRET}",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}

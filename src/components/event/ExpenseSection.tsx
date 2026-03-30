@@ -2,11 +2,12 @@
 
 import { useState, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Wallet, Trash2, ArrowRight, MessageCircle } from 'lucide-react'
+import { Wallet, Trash2, ArrowRight, MessageCircle, Download, FileText } from 'lucide-react'
 import { Card, CardHeader, CardContent, Button, Input, Select, useToast } from '@/components/ui'
 import { addExpense, deleteExpense } from '@/app/actions/expenses'
 import { simplifyDebts, totalExpenses } from '@/lib/debts'
 import { formatBalanceMessage, getWhatsAppUrl } from '@/lib/whatsapp'
+import { generateExpenseCSV, downloadCSV, printExpenseReport } from '@/lib/export-expenses'
 import { cn } from '@/lib/utils'
 import type { Expense, Participant } from '@/types'
 
@@ -331,6 +332,49 @@ export default function ExpenseSection({
                   <WhatsAppIcon />
                   Condividi saldi su WhatsApp
                 </button>
+
+                {/* Export buttons */}
+                {initialExpenses.length > 0 && (
+                  <div className="flex gap-2 mt-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const csv = generateExpenseCSV(initialExpenses, debts, total, eventTitle)
+                        downloadCSV(
+                          csv,
+                          `spese-${eventTitle.toLowerCase().replace(/\s+/g, '-')}.csv`
+                        )
+                        toast('CSV scaricato', 'success')
+                      }}
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full',
+                        'bg-surface-container-highest text-on-surface text-sm font-medium',
+                        'hover:bg-surface-bright active:scale-95 transition-all duration-150',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40'
+                      )}
+                      aria-label="Scarica spese in formato CSV"
+                    >
+                      <Download size={16} aria-hidden="true" />
+                      CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        printExpenseReport(initialExpenses, debts, total, eventTitle)
+                      }
+                      className={cn(
+                        'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full',
+                        'bg-surface-container-highest text-on-surface text-sm font-medium',
+                        'hover:bg-surface-bright active:scale-95 transition-all duration-150',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40'
+                      )}
+                      aria-label="Stampa o salva spese come PDF"
+                    >
+                      <FileText size={16} aria-hidden="true" />
+                      PDF
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* Separatore */}

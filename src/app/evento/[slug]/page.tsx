@@ -10,6 +10,8 @@ import ExpenseSection from '@/components/event/ExpenseSection'
 import ShareBar from '@/components/share/ShareBar'
 import AppBar from '@/components/ui/AppBar'
 import EventFAB from '@/components/event/EventFAB'
+import RealtimeProvider from '@/components/event/RealtimeProvider'
+import NotificationToggle from '@/components/event/NotificationToggle'
 
 export async function generateMetadata({
   params,
@@ -72,7 +74,12 @@ export default async function EventPage({
 
   return (
     <main className="min-h-screen bg-background">
-      <AppBar title={`${event.emoji} ${event.title}`} showBack />
+      <RealtimeProvider eventId={event.id} />
+      <AppBar
+        title={`${event.emoji} ${event.title}`}
+        showBack
+        rightAction={<NotificationToggle eventId={event.id} eventSlug={slug} />}
+      />
 
       <div className="mx-auto max-w-lg px-4 pt-[calc(3.5rem+env(safe-area-inset-top))] pb-24 space-y-6">
         <div
