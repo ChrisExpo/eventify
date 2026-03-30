@@ -1,5 +1,6 @@
 export type ParticipantStatus = 'confirmed' | 'maybe' | 'declined'
 export type PollType = 'single' | 'multiple'
+export type DateMode = 'fixed' | 'flexible'
 export type EventCategory =
   | 'grigliata'
   | 'cena'
@@ -22,6 +23,7 @@ export type Item = DB['public']['Tables']['items']['Row']
 export type Expense = DB['public']['Tables']['expenses']['Row']
 export type Poll = DB['public']['Tables']['polls']['Row']
 export type PollOption = DB['public']['Tables']['poll_options']['Row']
+export type DateVote = DB['public']['Tables']['date_votes']['Row']
 
 // Insert helpers
 export type EventInsert = DB['public']['Tables']['events']['Insert']

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { MapPin, Link2, AlignLeft, User, Tag } from 'lucide-react'
+import { MapPin, Link2, AlignLeft, User, Tag, Calendar } from 'lucide-react'
 
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -14,7 +14,7 @@ import { useToast } from '@/components/ui/Toast'
 
 import { createEvent } from '@/app/actions/events'
 import { EVENT_CATEGORIES, DEFAULT_EMOJI } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+import { cn, getMonday, generateWeekDays, formatDayShort } from '@/lib/utils'
 import { useUserName } from '@/hooks/useUserName'
 
 const categoryOptions = EVENT_CATEGORIES.map((c) => ({
@@ -25,10 +25,11 @@ const categoryOptions = EVENT_CATEGORIES.map((c) => ({
 // Helper per il min datetime: adesso + 30 minuti
 function getMinDatetime(): string {
   const d = new Date(Date.now() + 30 * 60 * 1000)
-  // formato YYYY-MM-DDTHH:MM richiesto da datetime-local
   const pad = (n: number) => String(n).padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
+
+type DateMode = 'fixed' | 'flexible'
 
 interface FormState {
   emoji: string
@@ -45,6 +46,7 @@ interface FormState {
 interface FormErrors {
   title?: string
   creatorName?: string
+  flexibleWeekStart?: string
 }
 
 export function CreateEventForm() {
@@ -65,6 +67,9 @@ export function CreateEventForm() {
     creatorName: '',
   })
 
+  const [dateMode, setDateMode] = useState<DateMode>('fixed')
+  const [flexibleWeekStart, setFlexibleWeekStart] = useState('')
+
   const [errors, setErrors] = useState<FormErrors>({})
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -84,10 +89,23 @@ export function CreateEventForm() {
     }
   }
 
+  function handleWeekInput(value: string) {
+    if (!value) {
+      setFlexibleWeekStart('')
+      return
+    }
+    const monday = getMonday(value)
+    setFlexibleWeekStart(monday)
+    setErrors((prev) => ({ ...prev, flexibleWeekStart: undefined }))
+  }
+
   function validate(): boolean {
     const next: FormErrors = {}
     if (!form.title.trim()) next.title = 'Il titolo è obbligatorio'
     if (!form.creatorName.trim()) next.creatorName = 'Inserisci il tuo nome'
+    if (dateMode === 'flexible' && !flexibleWeekStart) {
+      next.flexibleWeekStart = 'Seleziona la settimana di riferimento'
+    }
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -100,13 +118,15 @@ export function CreateEventForm() {
     fd.set('emoji', form.emoji)
     fd.set('title', form.title.trim())
     fd.set('category', form.category)
-    // Converti la data locale in ISO con timezone per evitare offset UTC
-    if (form.date) {
-      fd.set('date', new Date(form.date).toISOString())
+    fd.set('date_mode', dateMode)
+
+    if (dateMode === 'fixed') {
+      if (form.date) fd.set('date', new Date(form.date).toISOString())
+      if (form.dateEnd) fd.set('date_end', new Date(form.dateEnd).toISOString())
+    } else {
+      fd.set('flexible_week_start', flexibleWeekStart)
     }
-    if (form.dateEnd) {
-      fd.set('date_end', new Date(form.dateEnd).toISOString())
-    }
+
     fd.set('location_name', form.locationName.trim())
     fd.set('location_url', form.locationUrl.trim())
     fd.set('description', form.description.trim())
@@ -125,9 +145,7 @@ export function CreateEventForm() {
       }
 
       if ('slug' in result && result.slug && result.creatorToken) {
-        // Salva il creator token con la chiave dello slug reale
         localStorage.setItem(`event_${result.slug}_creator`, result.creatorToken)
-        // Memorizza il nome per pre-compilazioni future
         saveUserName(form.creatorName.trim())
         toast('Evento creato con successo!', 'success')
         router.push(`/evento/${result.slug}`)
@@ -136,6 +154,7 @@ export function CreateEventForm() {
   }
 
   const minDatetime = getMinDatetime()
+  const weekDays = flexibleWeekStart ? generateWeekDays(flexibleWeekStart) : []
 
   return (
     <form onSubmit={handleSubmit} noValidate aria-label="Modulo creazione evento">
@@ -187,29 +206,125 @@ export function CreateEventForm() {
             onChange={(e) => set('category', e.target.value)}
           />
 
-          <Input
-            id="event-date"
-            label="Data e ora"
-            name="date"
-            type="datetime-local"
-            value={form.date}
-            onChange={(e) => set('date', e.target.value)}
-            min={minDatetime}
-            className="cursor-pointer"
-          />
+          {/* Toggle data fissa / flessibile */}
+          <div>
+            <p className="text-xs font-bold uppercase tracking-widest text-primary flex items-center gap-1.5 mb-3">
+              <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
+              Quando
+            </p>
+            <div
+              className="flex gap-1 p-1 bg-surface-container-low rounded-full mb-4"
+              role="group"
+              aria-label="Tipo data evento"
+            >
+              <button
+                type="button"
+                className={cn(
+                  'flex-1 py-2 px-4 rounded-full text-sm font-bold transition-all',
+                  dateMode === 'fixed'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                )}
+                onClick={() => setDateMode('fixed')}
+                aria-pressed={dateMode === 'fixed'}
+              >
+                Data fissa
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  'flex-1 py-2 px-4 rounded-full text-sm font-bold transition-all',
+                  dateMode === 'flexible'
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                )}
+                onClick={() => setDateMode('flexible')}
+                aria-pressed={dateMode === 'flexible'}
+              >
+                Data flessibile
+              </button>
+            </div>
 
-          {form.date && (
-            <Input
-              id="event-date-end"
-              label="Data fine (opzionale)"
-              name="date_end"
-              type="datetime-local"
-              value={form.dateEnd}
-              onChange={(e) => set('dateEnd', e.target.value)}
-              min={form.date}
-              className="cursor-pointer"
-            />
-          )}
+            {/* Sezione data fissa */}
+            {dateMode === 'fixed' && (
+              <div className="flex flex-col gap-3">
+                <Input
+                  id="event-date"
+                  label="Data e ora"
+                  name="date"
+                  type="datetime-local"
+                  value={form.date}
+                  onChange={(e) => set('date', e.target.value)}
+                  min={minDatetime}
+                  className="cursor-pointer"
+                />
+                {form.date && (
+                  <Input
+                    id="event-date-end"
+                    label="Data fine (opzionale)"
+                    name="date_end"
+                    type="datetime-local"
+                    value={form.dateEnd}
+                    onChange={(e) => set('dateEnd', e.target.value)}
+                    min={form.date}
+                    className="cursor-pointer"
+                  />
+                )}
+              </div>
+            )}
+
+            {/* Sezione data flessibile */}
+            {dateMode === 'flexible' && (
+              <div className="flex flex-col gap-3">
+                <Input
+                  id="event-week-start"
+                  label="Scegli il lunedì della settimana"
+                  name="flexible_week_start_input"
+                  type="date"
+                  value={flexibleWeekStart}
+                  onChange={(e) => handleWeekInput(e.target.value)}
+                  error={errors.flexibleWeekStart}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-on-surface-variant -mt-1">
+                  Scegli qualsiasi giorno: calcoliamo automaticamente il lunedì della settimana.
+                </p>
+
+                {/* Preview settimana */}
+                {weekDays.length === 7 && (
+                  <div
+                    className="rounded-xl border border-primary/20 bg-surface-container-low p-3"
+                    aria-label="Anteprima giorni della settimana"
+                  >
+                    <p className="text-xs font-bold uppercase tracking-widest text-primary mb-2">
+                      Giorni disponibili per la votazione
+                    </p>
+                    <div className="grid grid-cols-7 gap-1">
+                      {weekDays.map((dateStr) => {
+                        const { dayName, dayNum, month } = formatDayShort(dateStr)
+                        return (
+                          <div
+                            key={dateStr}
+                            className="flex flex-col items-center gap-0.5 py-2 px-1 rounded-lg bg-surface-container text-center"
+                          >
+                            <span className="text-[10px] font-bold text-primary capitalize leading-none">
+                              {dayName}
+                            </span>
+                            <span className="text-base font-bold text-on-surface leading-none">
+                              {dayNum}
+                            </span>
+                            <span className="text-[10px] text-on-surface-variant capitalize leading-none">
+                              {month}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </CardContent>
         <div className="h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent mx-4" aria-hidden="true" />
 

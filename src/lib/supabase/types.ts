@@ -48,6 +48,8 @@ export type Database = {
           category: string
           date: string | null
           date_end: string | null
+          date_mode: string
+          flexible_week_start: string | null
           location_name: string | null
           location_url: string | null
           image_url: string | null
@@ -65,6 +67,8 @@ export type Database = {
           category?: string
           date?: string | null
           date_end?: string | null
+          date_mode?: string
+          flexible_week_start?: string | null
           location_name?: string | null
           location_url?: string | null
           image_url?: string | null
@@ -82,6 +86,8 @@ export type Database = {
           category?: string
           date?: string | null
           date_end?: string | null
+          date_mode?: string
+          flexible_week_start?: string | null
           location_name?: string | null
           location_url?: string | null
           image_url?: string | null
@@ -269,6 +275,29 @@ export type Database = {
           event_id?: string
           type?: '24h' | '2h'
           sent_at?: string
+        }
+        Relationships: []
+      }
+      date_votes: {
+        Row: {
+          id: string
+          event_id: string
+          date_option: string
+          voter_name: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          date_option: string
+          voter_name: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          date_option?: string
+          voter_name?: string
         }
         Relationships: []
       }

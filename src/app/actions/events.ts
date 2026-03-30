@@ -16,6 +16,12 @@ export async function createEvent(formData: FormData) {
   const dateEndRaw = formData.get('date_end') as string | null
   const date = dateRaw && dateRaw.trim() !== '' ? dateRaw.trim() : null
   const dateEnd = dateEndRaw && dateEndRaw.trim() !== '' ? dateEndRaw.trim() : null
+  const dateMode = (formData.get('date_mode') as string) || 'fixed'
+  const flexibleWeekStartRaw = formData.get('flexible_week_start') as string | null
+  const flexibleWeekStart =
+    flexibleWeekStartRaw && flexibleWeekStartRaw.trim() !== ''
+      ? flexibleWeekStartRaw.trim()
+      : null
   const locationName = formData.get('location_name') as string | null
   const locationUrl = formData.get('location_url') as string | null
   const description = formData.get('description') as string | null
@@ -55,6 +61,8 @@ export async function createEvent(formData: FormData) {
     category: category || 'altro',
     date,
     date_end: dateEnd,
+    date_mode: dateMode,
+    flexible_week_start: flexibleWeekStart,
     location_name: locationName || null,
     location_url: locationUrl || null,
     description: description || null,
@@ -116,6 +124,12 @@ export async function updateEvent(
 
   const updateDateRaw = formData.get('date') as string | null
   const updateDateEndRaw = formData.get('date_end') as string | null
+  const updateDateMode = (formData.get('date_mode') as string) || 'fixed'
+  const updateFlexibleWeekStartRaw = formData.get('flexible_week_start') as string | null
+  const updateFlexibleWeekStart =
+    updateFlexibleWeekStartRaw && updateFlexibleWeekStartRaw.trim() !== ''
+      ? updateFlexibleWeekStartRaw.trim()
+      : null
 
   const updateData: Record<string, unknown> = {
     title: formData.get('title') as string,
@@ -123,6 +137,8 @@ export async function updateEvent(
     category: (formData.get('category') as string) || 'altro',
     date: updateDateRaw && updateDateRaw.trim() !== '' ? updateDateRaw.trim() : null,
     date_end: updateDateEndRaw && updateDateEndRaw.trim() !== '' ? updateDateEndRaw.trim() : null,
+    date_mode: updateDateMode,
+    flexible_week_start: updateFlexibleWeekStart,
     location_name: (formData.get('location_name') as string) || null,
     location_url: (formData.get('location_url') as string) || null,
     description: (formData.get('description') as string) || null,

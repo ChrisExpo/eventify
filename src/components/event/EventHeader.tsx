@@ -8,6 +8,8 @@ interface EventHeaderProps {
 }
 
 export default function EventHeader({ event }: EventHeaderProps) {
+  const isFlexible = event.date_mode === 'flexible'
+
   return (
     <Card className="glass-panel electric-glow border border-outline-variant/10">
       <CardContent className="pt-6 pb-5">
@@ -50,9 +52,15 @@ export default function EventHeader({ event }: EventHeaderProps) {
         {/* Data */}
         <div className="flex items-center gap-2 text-sm text-on-surface-variant mb-2">
           <Calendar className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
-          <time dateTime={event.date ?? undefined} className="capitalize">
-            {formatEventDate(event.date, event.date_end)}
-          </time>
+          {isFlexible ? (
+            <span className="text-on-surface-variant italic">
+              Data da votare — partecipa alla votazione qui sotto
+            </span>
+          ) : (
+            <time dateTime={event.date ?? undefined} className="capitalize">
+              {formatEventDate(event.date, event.date_end)}
+            </time>
+          )}
         </div>
 
         {/* Luogo */}

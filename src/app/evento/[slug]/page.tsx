@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase/server'
 import { formatEventDate } from '@/lib/utils'
 import { notFound } from 'next/navigation'
 import EventHeader from '@/components/event/EventHeader'
+import DateVoteGrid from '@/components/event/DateVoteGrid'
 import ParticipantSection from '@/components/event/ParticipantSection'
 import ItemSection from '@/components/event/ItemSection'
 import PollSection, { type PollWithOptions } from '@/components/event/PollSection'
@@ -60,17 +61,28 @@ export default async function EventPage({
 
   if (!event) notFound()
 
-  const [{ data: participants }, { data: items }, { data: polls }, { data: expenses }] =
-    await Promise.all([
-      supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
-      supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
-      supabase
-        .from('polls')
-        .select('*, poll_options(*)')
-        .eq('event_id', event.id)
-        .order('created_at'),
-      supabase.from('expenses').select('*').eq('event_id', event.id).order('created_at'),
-    ])
+  const isFlexible =
+    event.date_mode === 'flexible' && !!event.flexible_week_start
+
+  const [
+    { data: participants },
+    { data: items },
+    { data: polls },
+    { data: expenses },
+    { data: dateVotes },
+  ] = await Promise.all([
+    supabase.from('participants').select('*').eq('event_id', event.id).order('created_at'),
+    supabase.from('items').select('*').eq('event_id', event.id).order('created_at'),
+    supabase
+      .from('polls')
+      .select('*, poll_options(*)')
+      .eq('event_id', event.id)
+      .order('created_at'),
+    supabase.from('expenses').select('*').eq('event_id', event.id).order('created_at'),
+    isFlexible
+      ? supabase.from('date_votes').select('*').eq('event_id', event.id).order('created_at')
+      : Promise.resolve({ data: [] }),
+  ])
 
   return (
     <main className="min-h-screen bg-background">
@@ -88,6 +100,20 @@ export default async function EventPage({
         >
           <EventHeader event={event} />
         </div>
+
+        {/* Griglia votazione date — solo per eventi flessibili */}
+        {isFlexible && event.flexible_week_start && (
+          <div
+            className="animate-slide-in-up"
+            style={{ animationDelay: '60ms', opacity: 0, animationFillMode: 'forwards' }}
+          >
+            <DateVoteGrid
+              eventId={event.id}
+              weekStart={event.flexible_week_start}
+              initialVotes={dateVotes ?? []}
+            />
+          </div>
+        )}
 
         <div
           className="animate-slide-in-up"
