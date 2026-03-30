@@ -42,76 +42,45 @@ export function printExpenseReport(
   totalAmount: number,
   eventTitle: string
 ) {
-  const printWindow = window.open('', '_blank')
-  if (!printWindow) return
+  // Genera il PDF come blob HTML e scaricalo come file
+  // Evita window.open che su iOS/PWA lascia una finestra bianca bloccata
+  const html = `<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<title>Spese — ${eventTitle}</title>
+<style>
+body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1a1a1a; }
+h1 { font-size: 24px; margin-bottom: 8px; }
+h2 { font-size: 18px; margin-top: 32px; color: #666; }
+table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #f5f5f5; font-weight: 600; }
+.total { font-weight: 700; font-size: 18px; margin-top: 16px; }
+.debt { padding: 8px 0; }
+.footer { margin-top: 40px; color: #999; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>Spese — ${eventTitle}</h1>
+<table>
+<thead><tr><th>Descrizione</th><th>Importo</th><th>Pagato da</th><th>Diviso tra</th></tr></thead>
+<tbody>
+${expenses.map((e) => `<tr><td>${e.description}</td><td>€${e.amount.toFixed(2)}</td><td>${e.paid_by}</td><td>${e.split_among.join(', ')}</td></tr>`).join('')}
+</tbody>
+</table>
+<p class="total">Totale: €${totalAmount.toFixed(2)}</p>
+<h2>Riepilogo Saldi</h2>
+${debts.length === 0 ? '<p>Tutti pari!</p>' : debts.map((d) => `<p class="debt">• ${d.from} deve €${d.amount.toFixed(2)} a ${d.to}</p>`).join('')}
+<p class="footer">Generato da FriendsFest</p>
+</body>
+</html>`
 
-  const html = `
-    <!DOCTYPE html>
-    <html lang="it">
-    <head>
-      <meta charset="UTF-8" />
-      <title>Spese — ${eventTitle}</title>
-      <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 40px; color: #1a1a1a; }
-        h1 { font-size: 24px; margin-bottom: 8px; }
-        h2 { font-size: 18px; margin-top: 32px; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f5f5f5; font-weight: 600; }
-        .total { font-weight: 700; font-size: 18px; margin-top: 16px; }
-        .debt { padding: 8px 0; }
-        .footer { margin-top: 40px; color: #999; font-size: 12px; }
-        @media print { body { padding: 20px; } }
-      </style>
-    </head>
-    <body>
-      <h1>Spese — ${eventTitle}</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Descrizione</th>
-            <th>Importo</th>
-            <th>Pagato da</th>
-            <th>Diviso tra</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${expenses
-            .map(
-              (e) => `
-            <tr>
-              <td>${e.description}</td>
-              <td>€${e.amount.toFixed(2)}</td>
-              <td>${e.paid_by}</td>
-              <td>${e.split_among.join(', ')}</td>
-            </tr>
-          `
-            )
-            .join('')}
-        </tbody>
-      </table>
-      <p class="total">Totale: €${totalAmount.toFixed(2)}</p>
-
-      <h2>Riepilogo Saldi</h2>
-      ${
-        debts.length === 0
-          ? '<p>Tutti pari!</p>'
-          : debts
-              .map(
-                (d) =>
-                  `<p class="debt">• ${d.from} deve €${d.amount.toFixed(2)} a ${d.to}</p>`
-              )
-              .join('')
-      }
-
-      <p class="footer">Generato da FriendsFest</p>
-    </body>
-    </html>
-  `
-
-  printWindow.document.write(html)
-  printWindow.document.close()
-  printWindow.onload = () => {
-    printWindow.print()
-  }
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `spese-${eventTitle.toLowerCase().replace(/\s+/g, '-')}.html`
+  a.click()
+  URL.revokeObjectURL(url)
 }

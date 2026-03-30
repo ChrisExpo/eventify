@@ -174,7 +174,7 @@ export default function ExpenseSection({
 
   function handleShareBalances() {
     const message = formatBalanceMessage(eventTitle, debts, total)
-    window.open(getWhatsAppUrl(message), '_blank', 'noopener,noreferrer')
+    window.location.href = getWhatsAppUrl(message)
   }
 
   return (

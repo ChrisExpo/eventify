@@ -43,7 +43,8 @@ export default function WhatsAppButton({
       participants.map(p => ({ name: p.name, status: p.status })),
       items.map(i => ({ name: i.name, assigned_to: i.assigned_to }))
     )
-    window.open(getWhatsAppUrl(message), '_blank', 'noopener,noreferrer')
+    // Usa location.href per evitare finestra bianca al ritorno su iOS/PWA
+    window.location.href = getWhatsAppUrl(message)
   }
 
   return (
